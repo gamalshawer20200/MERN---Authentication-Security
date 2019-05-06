@@ -38,12 +38,14 @@ UserSchema.methods.toJSON = function () {
     var user = this
     var userObject = user.toObject()
 
-    return _.pick(userObject,['_id','email'])
+    return _.pick(userObject, ['_id', 'email'])
 }
+
+//methods -> instance method
 UserSchema.methods.generateAuthToken = function () {
     var user = this
     var access = 'auth'
-    var token = jwt.sign({ _id: user._id.toHexString(), access }, 'abc123').toString()
+    var token = jwt.sign({ '_id': user._id.toHexString(), access }, 'abc123').toString()
 
     user.tokens.push({ access, token })
 
@@ -51,6 +53,31 @@ UserSchema.methods.generateAuthToken = function () {
         return token;
     })
 }
+
+//statics -> Model method
+UserSchema.statics.findByToken = function (token) {
+    var User = this  //User upper case as it model method
+    var decoded;
+
+
+    try {
+        decoded = jwt.verify(token, 'abc123')
+    } catch (e) {
+        //console.log('****************error*************', e)
+        // return new Promise((resolve, reject) => {
+        //     reject();
+        // })
+        return Promise.reject('authentication is required ! by promise <')
+    }
+    // console.log(decoded)
+
+    return User.findOne({
+        '_id': decoded._id,
+        'tokens.token': token,    //take care
+        'tokens.access': 'auth'
+    })
+}
+
 
 var User = mongoose.model('User', UserSchema)
 

@@ -8,12 +8,12 @@ const { ObjectID } = require('mongodb');
 var { mongoose } = require('./db/mongoose');
 var { Todo } = require('./models/todo');
 var { User } = require('./models/user');
+var { authenticate } = require('./middleware/authenticate')
 
 var app = express();
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
-
 
 app.post('/todos', (req, res) => {
     //console.log(req.body);
@@ -111,14 +111,20 @@ app.post('/users', (req, res) => {
         but do not return it which result in cant resolve or reject this promise so we do not move to run the code of then inwhich we set headers  */
     }).then((token) => {
         //console.log('headers set successfuly !')
-        res.header('x-auth',token).send(user)
-        
+        res.header('x-auth', token).send(user)
+
     }).catch((e) => {
         if (e.code === 11000) {
             res.status(400).send('Duplicated email !!')
         }
         res.status(400).send(e)
     })
+})
+
+
+
+app.get('/users/me', authenticate, (req, res) => {
+    res.send(req.user)
 })
 
 app.listen(port, () => {
