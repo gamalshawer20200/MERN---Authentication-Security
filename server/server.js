@@ -94,6 +94,33 @@ app.patch('/todos/:id', (req, res) => {
     }).catch((e) => res.status(500).send())
 })
 
+app.post('/users', (req, res) => {
+    var body = _.pick(req.body, ['email', 'password']);
+    var user = new User(body)
+    /* 
+        User.findByToken           // Model methods
+        newUser.generateAuthToken  // instance methods */
+
+
+    user.save().then(() => {
+        return user.generateAuthToken()
+        // var x = user.generateAuthToken()
+        // console.log(x) 
+        /* the return value is promise that should return to the next "then" ,
+        Here in comment section i print the returned value 
+        but do not return it which result in cant resolve or reject this promise so we do not move to run the code of then inwhich we set headers  */
+    }).then((token) => {
+        //console.log('headers set successfuly !')
+        res.header('x-auth',token).send(user)
+        
+    }).catch((e) => {
+        if (e.code === 11000) {
+            res.status(400).send('Duplicated email !!')
+        }
+        res.status(400).send(e)
+    })
+})
+
 app.listen(port, () => {
     console.log(`Started up at port : ${port}`)
 });
