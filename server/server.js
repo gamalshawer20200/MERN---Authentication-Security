@@ -115,7 +115,7 @@ app.post('/users', (req, res) => {
 
     }).catch((e) => {
         if (e.code === 11000) {
-            res.status(400).send('Duplicated email !!')
+            return res.status(400).send('Duplicated email !!')
         }
         res.status(400).send(e)
     })
