@@ -226,7 +226,7 @@ describe('POST /users', () => {
     it('Should return validation errors if request invalid', (done) => {
         request(app)
             .post('/users')
-            .send({email:'bbnuun',password:'123abc!'})
+            //.send({email:'bbnuun',password:'123abc!'})
             .expect(400)
             .expect((res) => {
                 expect(res.body.message).toBe('User validation failed')

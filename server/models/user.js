@@ -79,6 +79,29 @@ UserSchema.statics.findByToken = function (token) {
     })
 }
 
+UserSchema.statics.comparePass = function (email, password) {
+    var User = this
+    return User.findOne({ email }).then((user) => {
+        if (!user) {
+            return Promise.reject('User not Found !')
+        }
+        return new Promise((resolve, reject) => {
+            bcrypt.compare(password, user.password, (err, res) => {
+                // console.log(res)
+                if (res === true) {
+                    resolve({user , message: 'Authenticated !'})
+                } else {
+                    reject('pass is not correct !')
+                }
+            })
+
+        })
+    }).catch((e) => {
+        return Promise.reject(e)
+    })
+}
+
+
 UserSchema.pre('save', function (next) {
     var user = this
     if (user.isModified('password')) {  //(without this line) -> as if the user modify any other attribute but password still the same , method will fire and it will result in program crash as we try to hash a HASHED value , got it ? :D
@@ -111,4 +134,4 @@ var User = mongoose.model('User', UserSchema)
 
 module.exports = {
     User
-}
+};

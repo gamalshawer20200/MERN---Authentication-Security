@@ -127,6 +127,15 @@ app.get('/users/me', authenticate, (req, res) => {
     res.send(req.user)
 })
 
+app.post('/users/login', (req, res) => {
+    var body = _.pick(req.body, ['email', 'password'])
+    User.comparePass(body.email, body.password).then((result) => {
+        res.status(200).send(`Status : ${result.message} \n User-obj :${result.user}`)
+    }).catch((e) => {
+        res.status(404).send(e)
+    })
+})
+
 app.listen(port, () => {
     console.log(`Started up at port : ${port}`)
 });
