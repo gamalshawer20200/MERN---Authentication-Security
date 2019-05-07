@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken')
 const _ = require('lodash')
+const bcrypt = require('bcryptjs')
 
 var UserSchema = new mongoose.Schema({
     email: {
@@ -77,6 +78,21 @@ UserSchema.statics.findByToken = function (token) {
         'tokens.access': 'auth'
     })
 }
+
+UserSchema.pre('save', function (next) {
+    var user = this
+    if (user.isModified('password')) {  //(without this line) -> as if the user modify any other attribute but password still the same , method will fire and it will result in program crash as we try to hash a HASHED value , got it ? :D
+        bcrypt.genSalt(5, (err, salt) => {
+            bcrypt.hash(user.password, salt, (err, hash) => {
+                // console.log(hash)
+                user.password = hash;
+                next();
+            })
+        })
+    } else {
+        next();
+    }
+})
 
 
 var User = mongoose.model('User', UserSchema)
