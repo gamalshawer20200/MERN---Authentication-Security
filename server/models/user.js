@@ -55,6 +55,15 @@ UserSchema.methods.generateAuthToken = function () {
     })
 }
 
+UserSchema.methods.removeToken = function (token) {
+    var user = this
+    return user.update({
+        $pull: {
+            tokens: { token }
+        }
+    })
+}
+
 //statics -> Model method
 UserSchema.statics.findByToken = function (token) {
     var User = this  //User upper case as it model method
@@ -89,7 +98,7 @@ UserSchema.statics.findByCredentials = function (email, password) {
             bcrypt.compare(password, user.password, (err, res) => {
                 // console.log(res)
                 if (res === true) {
-                    resolve({user , message: 'Authenticated !'})
+                    resolve({ user, message: 'Authenticated !' })
                 } else {
                     reject('pass is not correct !')
                 }
