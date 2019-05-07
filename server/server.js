@@ -129,8 +129,11 @@ app.get('/users/me', authenticate, (req, res) => {
 
 app.post('/users/login', (req, res) => {
     var body = _.pick(req.body, ['email', 'password'])
-    User.comparePass(body.email, body.password).then((result) => {
-        res.status(200).send(`Status : ${result.message} \n User-obj :${result.user}`)
+    User.findByCredentials(body.email, body.password).then((result) => {
+        //res.status(200).send(`Status : ${result.message} \n User-obj :${result.user}`)
+        return result.user.generateAuthToken().then((token) => {
+            res.header('x-auth', token).send(result.user)
+        })
     }).catch((e) => {
         res.status(404).send(e)
     })

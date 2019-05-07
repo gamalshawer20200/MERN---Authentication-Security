@@ -79,7 +79,7 @@ UserSchema.statics.findByToken = function (token) {
     })
 }
 
-UserSchema.statics.comparePass = function (email, password) {
+UserSchema.statics.findByCredentials = function (email, password) {
     var User = this
     return User.findOne({ email }).then((user) => {
         if (!user) {
