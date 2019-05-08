@@ -19,8 +19,8 @@ describe('POST /todos', () => {
             .set('x-auth', users[0].tokens[0].token)
             .send({ text })
             .expect(200)
-            .expect((res) => {
-                expect(res.body.text).toBe(text);
+            .expect((res) => { //expect function comming from supertest
+                expect(res.body.text).toBe(text); //expect func comming from expect
             })
             .end((err, res) => {
                 if (err) {
@@ -126,7 +126,7 @@ describe('DELETE /todos', () => {
                 if (err) { return done(err) }
 
                 Todo.findById(hexId).then((doc) => {
-                    expect(doc).toNotExist();
+                    expect(doc).toBeFalsy(); //toNotExist() -> old verion of expect
                     done();
                 }).catch((e) => done(e))
             })
@@ -143,7 +143,7 @@ describe('DELETE /todos', () => {
                 if (err) { return done(err) }
 
                 Todo.findById(hexId).then((doc) => {
-                    expect(doc).toExist();
+                    expect(doc).toBeTruthy(); //toExist() -> in old version of expect
                     done();
                 }).catch((e) => done(e))
             })
@@ -179,7 +179,8 @@ describe('PATCH /todos/:id', () => {
             .expect(200)
             .expect((res) => {
                 expect(res.body.doc.completed).toBe(true)
-                expect(res.body.doc.completedAt).toBeA('string') //as i use new Date().tolocaleString instead of ( new Date().getTime() which return a number || timeStamp )
+               // expect(res.body.doc.completedAt).toBeA('string') //expect old version 
+               expect(typeof res.body.doc.completedAt).toBe('string') //as i use new Date().tolocaleString instead of ( new Date().getTime() which return a number || timeStamp )
             })
             .end(done)
     })
@@ -205,7 +206,7 @@ describe('PATCH /todos/:id', () => {
             .expect(200)
             .expect((res) => {
                 expect(res.body.doc.completed).toBe(false)
-                expect(res.body.doc.completedAt).toNotExist()
+                expect(res.body.doc.completedAt).toBeFalsy()
             })
             .end(done)
     })
@@ -251,6 +252,8 @@ describe('POST /users', () => {
             .send(user)
             .expect(200)
             .expect((res) => {
+                expect(res.headers['x-auth']).toBeTruthy()
+                expect(res.body._id).toBeTruthy()
                 expect(res.body.email).toBe(user.email)
                 //console.log(res.body)
             })
@@ -260,8 +263,8 @@ describe('POST /users', () => {
                 }
 
                 User.findOne({ email: user.email }).then((userDoc) => {
-                    expect(userDoc).toExist()
-                    expect(userDoc.password).toNotBe(user.password)
+                    expect(userDoc).toBeTruthy()
+                    expect(userDoc.password).not.toBe(user.password) //toNotBe() -> in old version of expect
                     done();
                 }).catch((e) => done(e))
             })
@@ -301,7 +304,7 @@ describe('POST /users/login', () => {
             .send({ email: users[1].email, password: users[1].password })
             .expect(200)
             .expect((res) => {
-                expect(res.headers['x-auth']).toExist()
+                expect(res.headers['x-auth']).toBeTruthy()
                 //console.log('**********************',res.body)
             })
             .end((err, res) => {
@@ -310,7 +313,7 @@ describe('POST /users/login', () => {
                 }
                 //console.log(res.body)
                 User.findById(users[1]._id).then((user) => {
-                    expect(user.tokens[1]).toInclude({ //kol mra by3ml feha login by7sl push L (access w token) f array el tokens l el user da fbtzeed el (token.length) +1 
+                    expect(user.toObject().tokens[1]).toMatchObject({ //kol mra by3ml feha login by7sl push L (access w token) f array el tokens l el user da fbtzeed el (token.length) +1 
                         access: 'auth',               // w e7na hna el default enna bndeef tokens[0] f el seed.js lel 2users ele 3ndna f lma hagy a check broh lel gdeeda ele lsa metdafa f el test ele hya tokens[1] 
                         token: res.headers['x-auth']
                     });
